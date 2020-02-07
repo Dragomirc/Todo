@@ -1,11 +1,17 @@
 import React, { Component } from 'react';
-import TodoList from './TodoList';
-
+import axios from 'axios';
+import TodoList from '../components/TodoList';
+const baseUrl = 'https://jsonplaceholder.typicode.com/todos';
 class App extends Component {
   state = {
     taskName: '',
     todos: []
   };
+
+  async componentDidMount() {
+    const res = await axios.get(baseUrl);
+    this.setState({ todos: [...res.data.slice(0, 5)] });
+  }
 
   onChange = ({ target: { name, value } }) => {
     this.setState({ [name]: value });
@@ -15,8 +21,12 @@ class App extends Component {
     e.preventDefault();
     const { todos, taskName } = this.state;
     // Fake ajax call
-    const res = await new Promise.resolve(taskName);
-    const newTodos = [...todos, res];
+    // const res = await Promise.resolve(taskName);
+    const res = await axios.post(baseUrl, {
+      title: taskName,
+      completed: false
+    });
+    const newTodos = [res.data, ...todos];
     this.setState({ todos: newTodos, taskName: '' });
   };
 
@@ -30,10 +40,11 @@ class App extends Component {
             id="todo"
             name="taskName"
             type="text"
+            autoComplete="off"
             value={taskName}
             onChange={this.onChange}
           />
-          <button>Add</button>
+          <button type="submit">Add</button>
         </form>
         <TodoList todoList={todos} />
       </div>
